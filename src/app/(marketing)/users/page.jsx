@@ -1,35 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
-const page = () => {
-	// const router = useRouter();
+const getUsers = async () => {
+	const res = await fetch("https://jsonplaceholder.typicode.com/users");
+	const data = await res.json();
+	return data;
+};
 
-	// console.log("router -> ", router);
+const page = async () => {
+	const users = await getUsers();
+
+	console.log("users data -> ", users);
 
 	return (
 		<div>
 			<h1>user pages</h1>
 
+			<Suspense
+				fallback={
+					<h1 className="text-2xl text-green-500"> Loading... Suspense </h1>
+				}
+			/>
+
 			<ul>
-				<li>
-					<Link
-						href={{
-							pathname: "/users/1",
-							query: {
-								isAmin: false,
-							},
-						}}
-						replace
-						prefetch={false}
-					>
-						user 1
-					</Link>
-					<Link href="/users/2"> user 2 </Link>
-					<Link href="/users/3"> user 3 </Link>
-					<Link href="/users/4"> user 4 </Link>
-				</li>
+				{users &&
+					users?.map((user) => (
+						<li key={user?.id}>
+							<span> {user?.id} </span> -
+							<Link href={`/users/${user?.id}`}> {user?.username} </Link>
+						</li>
+					))}
 			</ul>
 		</div>
 	);
